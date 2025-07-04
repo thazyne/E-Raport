@@ -24,7 +24,10 @@
     </form>
     @if(request('tahun_masuk'))
         <h2>Daftar Siswa Tahun Masuk {{ request('tahun_masuk') }}</h2>
-        <a href="{{ route('students.create') }}" class="btn btn-primary mb-3">Tambah Siswa</a>
+        <div class="mb-3">
+            <a href="{{ route('students.create') }}" class="btn btn-primary">Tambah Siswa</a>
+            <a href="{{ route('students.import') }}" class="btn btn-success">Import Data Siswa</a>
+        </div>
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif

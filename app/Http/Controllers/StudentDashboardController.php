@@ -12,7 +12,26 @@ class StudentDashboardController extends Controller
     public function index()
     {
         $student = Auth::guard('student')->user();
-        return view('student.dashboard', compact('student'));
+        
+        // Performance Statistics
+        $totalGrades = \App\Models\Grade::where('student_id', $student->id)->count();
+        $avgGrade = \App\Models\Grade::where('student_id', $student->id)->avg('nilai');
+        $latestGrades = \App\Models\Grade::with('subject')
+            ->where('student_id', $student->id)
+            ->latest()
+            ->take(5)
+            ->get();
+            
+        // Grade distribution for this student
+        $gradeDistribution = [
+            'A' => \App\Models\Grade::where('student_id', $student->id)->where('predikat', 'A')->count(),
+            'B' => \App\Models\Grade::where('student_id', $student->id)->where('predikat', 'B')->count(),
+            'C' => \App\Models\Grade::where('student_id', $student->id)->where('predikat', 'C')->count(),
+            'D' => \App\Models\Grade::where('student_id', $student->id)->where('predikat', 'D')->count(),
+            'E' => \App\Models\Grade::where('student_id', $student->id)->where('predikat', 'E')->count(),
+        ];
+        
+        return view('student.dashboard', compact('student', 'totalGrades', 'avgGrade', 'latestGrades', 'gradeDistribution'));
     }
 
     public function profile()

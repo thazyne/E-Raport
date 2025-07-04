@@ -10,7 +10,7 @@ class Grade extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id', 'subject_id', 'semester', 'tahun_ajaran', 'nilai', 'predikat', 'deskripsi'
+        'student_id', 'subject_id', 'semester', 'tahun_ajaran', 'nilai', 'predikat', 'deskripsi', 'komentar_guru', 'tanggal_input'
     ];
 
     public function student() {

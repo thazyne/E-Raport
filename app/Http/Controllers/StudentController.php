@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Student;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\StudentsImport;
 
 class StudentController extends Controller
 {
@@ -119,5 +121,38 @@ class StudentController extends Controller
         $tahun_masuk = substr($request->tahun_pelajaran, 0, 4);
         $tahun_sekarang = date('Y');
         $kelas = 10 + ($tahun_sekarang - $tahun_masuk);
+    }
+
+    public function import()
+    {
+        return view('students.import');
+    }
+
+    public function processImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        try {
+            Excel::import(new StudentsImport, $request->file('file'));
+            return redirect()->route('students.index')->with('success', 'Data siswa berhasil diimport!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $data = [
+            ['nisn', 'nama', 'email', 'password', 'alamat', 'kelas', 'tahun_masuk'],
+            ['1234567890', 'Contoh Siswa', 'siswa@example.com', 'password123', 'Jl. Contoh No. 1', '10', '2024'],
+        ];
+
+        return Excel::download(new class($data) implements \Maatwebsite\Excel\Concerns\FromArray {
+            private $data;
+            public function __construct($data) { $this->data = $data; }
+            public function array(): array { return $this->data; }
+        }, 'template-siswa.xlsx');
     }
 }

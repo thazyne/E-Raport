@@ -44,6 +44,11 @@
             <label for="deskripsi" class="form-label">Deskripsi</label>
             <textarea name="deskripsi" class="form-control">{{ old('deskripsi', $grade->deskripsi) }}</textarea>
         </div>
+        <div class="mb-3">
+            <label for="komentar_guru" class="form-label">Komentar Guru</label>
+            <textarea name="komentar_guru" class="form-control" rows="3" placeholder="Tambahkan komentar atau saran untuk siswa...">{{ old('komentar_guru', $grade->komentar_guru) }}</textarea>
+            <small class="form-text text-muted">Komentar ini akan ditampilkan di rapor siswa</small>
+        </div>
         <button type="submit" class="btn btn-success">Update</button>
         <a href="{{ route('grades.index') }}" class="btn btn-secondary">Batal</a>
     </form>

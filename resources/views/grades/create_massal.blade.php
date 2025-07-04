@@ -42,6 +42,7 @@
                     <th>Nilai</th>
                     <th>Predikat</th>
                     <th>Deskripsi</th>
+                    <th>Komentar Guru</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,6 +53,7 @@
                     <td><input type="number" name="nilai[{{ $subject->id }}]" class="form-control nilai-input" min="0" max="100"></td>
                     <td><input type="text" class="form-control predikat-input" readonly></td>
                     <td><input type="text" class="form-control deskripsi-input" readonly></td>
+                    <td><textarea name="komentar_guru[{{ $subject->id }}]" class="form-control" rows="2" placeholder="Komentar untuk {{ $subject->nama_mapel }}..."></textarea></td>
                 </tr>
                 @endforeach
             </tbody>

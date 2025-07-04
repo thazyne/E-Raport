@@ -30,10 +30,46 @@ class GradeController extends Controller
         return view('grades.create_massal', compact('students', 'subjects', 'tahunList', 'semesterList'));
     }
 
+    public function createSingle()
+    {
+        $students = Student::all();
+        $subjects = Subject::all();
+        return view('grades.create', compact('students', 'subjects'));
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
+    {
+        // Check if this is single grade entry or bulk entry
+        if ($request->has('nilai') && is_array($request->nilai)) {
+            return $this->storeBulk($request);
+        } else {
+            return $this->storeSingle($request);
+        }
+    }
+
+    private function storeSingle(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'subject_id' => 'required|exists:subjects,id',
+            'semester' => 'required',
+            'tahun_ajaran' => 'required',
+            'nilai' => 'required|integer',
+            'predikat' => 'nullable',
+            'deskripsi' => 'nullable',
+            'komentar_guru' => 'nullable',
+        ]);
+
+        $data = $request->only(['student_id', 'subject_id', 'semester', 'tahun_ajaran', 'nilai', 'predikat', 'deskripsi', 'komentar_guru']);
+        $data['tanggal_input'] = now();
+        Grade::create($data);
+        return redirect()->route('grades.index')->with('success', 'Nilai berhasil ditambahkan.');
+    }
+
+    private function storeBulk(Request $request)
     {
         $request->validate([
             'student_id' => 'required|exists:students,id',
@@ -49,6 +85,7 @@ class GradeController extends Controller
             if ($nilai !== null) {
                 $predikat = $this->getPredikat($nilai);
                 $deskripsi = $this->getDeskripsi($nilai);
+                $komentar_guru = $request->komentar_guru[$subject_id] ?? '';
                 Grade::updateOrCreate(
                     [
                         'student_id' => $student_id,
@@ -60,6 +97,8 @@ class GradeController extends Controller
                         'nilai' => $nilai,
                         'predikat' => $predikat,
                         'deskripsi' => $deskripsi,
+                        'komentar_guru' => $komentar_guru,
+                        'tanggal_input' => now(),
                     ]
                 );
             }
@@ -126,9 +165,12 @@ class GradeController extends Controller
             'nilai' => 'required|integer',
             'predikat' => 'nullable',
             'deskripsi' => 'nullable',
+            'komentar_guru' => 'nullable',
         ]);
         $grade = Grade::findOrFail($id);
-        $grade->update($request->all());
+        $updateData = $request->only(['student_id', 'subject_id', 'semester', 'tahun_ajaran', 'nilai', 'predikat', 'deskripsi', 'komentar_guru']);
+        $updateData['tanggal_input'] = now();
+        $grade->update($updateData);
         return redirect()->route('grades.index')->with('success', 'Nilai berhasil diupdate.');
     }
 

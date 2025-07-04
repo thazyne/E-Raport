@@ -42,13 +42,38 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('/dashboard', function () {
         $totalStudents = Student::count();
         $totalSubjects = Subject::count();
+        $totalGrades = Grade::count();
         $latestStudents = Student::latest()->take(5)->get();
         $latestSubjects = Subject::with('group')->latest()->take(5)->get();
-        return view('admin.dashboard', compact('totalStudents', 'totalSubjects', 'latestStudents', 'latestSubjects'));
+        
+        // Performance Analytics
+        $avgGrade = Grade::avg('nilai');
+        $gradeDistribution = [
+            'A' => Grade::where('predikat', 'A')->count(),
+            'B' => Grade::where('predikat', 'B')->count(), 
+            'C' => Grade::where('predikat', 'C')->count(),
+            'D' => Grade::where('predikat', 'D')->count(),
+            'E' => Grade::where('predikat', 'E')->count(),
+        ];
+        
+        // Recent Activity
+        $recentGrades = Grade::with(['student', 'subject'])
+            ->latest()
+            ->take(10)
+            ->get();
+            
+        return view('admin.dashboard', compact(
+            'totalStudents', 'totalSubjects', 'totalGrades', 'avgGrade',
+            'latestStudents', 'latestSubjects', 'gradeDistribution', 'recentGrades'
+        ));
     })->name('admin.dashboard');
     Route::resource('students', StudentController::class);
+    Route::get('students/import/form', [StudentController::class, 'import'])->name('students.import');
+    Route::post('students/import/process', [StudentController::class, 'processImport'])->name('students.process-import');
+    Route::get('students/template/download', [StudentController::class, 'downloadTemplate'])->name('students.download-template');
     Route::resource('subjects', SubjectController::class);
     Route::resource('grades', GradeController::class);
+    Route::get('grades/create/single', [GradeController::class, 'createSingle'])->name('grades.create.single');
 });
 
 // Route dashboard & menu siswa (hanya untuk siswa yang login)
@@ -60,6 +85,7 @@ Route::middleware('auth:student')->prefix('siswa')->group(function () {
     Route::post('/update-password', [StudentDashboardController::class, 'updatePassword'])->name('student.update_password.post');
     Route::post('/logout', [StudentDashboardController::class, 'logout'])->name('student.logout');
     Route::get('/raport/pdf', [StudentDashboardController::class, 'exportRaportPdf'])->name('student.raport.pdf');
+    Route::get('/raport/excel', [StudentDashboardController::class, 'exportRaportExcel'])->name('student.raport.excel');
     Route::get('/raport/excel', [StudentDashboardController::class, 'exportRaportExcel'])->name('student.raport.excel');
     Route::get('/profil/pdf', [StudentDashboardController::class, 'exportProfilePdf'])->name('student.profile.pdf');
     Route::get('/profil/excel', [StudentDashboardController::class, 'exportProfileExcel'])->name('student.profile.excel');

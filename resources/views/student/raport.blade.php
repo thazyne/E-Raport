@@ -37,6 +37,7 @@
                     <th>Nilai</th>
                     <th>Predikat</th>
                     <th>Deskripsi</th>
+                    <th>Komentar Guru</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,6 +48,13 @@
                     <td>{{ $g->nilai }}</td>
                     <td>{{ $g->predikat }}</td>
                     <td>{{ $g->deskripsi }}</td>
+                    <td>
+                        @if($g->komentar_guru)
+                            <div class="text-primary small">{{ $g->komentar_guru }}</div>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
